@@ -1,0 +1,1081 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dbo: <http://dbpedia.org/ontology/> .
+@prefix dbp: <http://dbpedia.org/property/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix : <http://SEKM_EXAM.com/ns#> .
+
+#========================================
+#         Definition of shapes
+#========================================
+
+
+#============================================PERSON============================================
+:PersonShape a sh:NodeShape;
+    sh:targetClass dbo:Person;
+    sh:property [ 
+        sh:path dbp:name;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:pattern "[A-Za-zÄÜÖäüö.]+";
+        sh:message "Person given name is invalid or undefined";
+    ];
+    sh:property [
+        sh:path dbp:birthDate;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:datatype xsd:date;
+        sh:message "Person birth date is invalid";
+    ];
+    sh:property [ 
+        sh:path dbp:deathDate;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+        sh:datatype xsd:date;
+        sh:minCount 0;
+        sh:maxCount 1;
+        sh:message "Person death date is invalid";
+    ];
+    sh:property [ 
+        sh:path dbp:birthDate;
+        sh:lessThan dbp:deathDate;
+        sh:message "Person birth date is greater than death date";
+    ];
+    sh:property [
+        sh:path dbp:birthPlace;
+        sh:minCount 1;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Person birthplace not set or undefined";
+    ];
+    sh:property [
+        sh:path dbp:deathPlace;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Person deathplace is invalid";
+    ];
+    sh:property [
+        sh:path dbp:caption;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:minLength 1;
+        sh:message "Person caption invalid or not set";
+    ];
+    sh:property [
+        sh:path dbp:nationality;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:minCount 1;
+        sh:maxCount 2;
+        sh:message "Person nationality not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:religion;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Person religion is invalid";
+    ].
+#==============================================================================================
+
+#=============================================FILM=============================================
+:FilmShape a sh:NodeShape;
+    sh:targetClass dbo:Film;
+    sh:property [
+        sh:path dbp:director;
+        sh:minCount 1;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Film director is invalid or undefined";
+    ];
+    sh:property [
+        sh:path dbp:country;
+        sh:minCount 1;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Film origin country not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:title;
+        sh:minCount 1;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:message "Film title is undefined or invalid";
+    ];
+    sh:property [
+        sh:path dbp:released;
+        sh:minCount 0;
+        sh:or(
+            [
+                sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+                sh:datatype xsd:date;
+                sh:message "Film release date is invalid or undefined";
+            ]
+            [
+                sh:pattern "^\\d{4}";
+                sh:datatype xsd:integer;
+                sh:message "Film release year is invalid or undefined";
+            ]
+        );
+    ];
+    sh:property [
+        sh:path dbp:starring;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:minCount 1;
+        sh:message "Film cast undefined";
+    ];
+    sh:property [
+        sh:path dbp:producer;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:minCount 1;
+        sh:message "Film producer is invalid or undefined";
+    ].
+#==============================================================================================
+
+#============================================PLACE=============================================
+:PlaceShape a sh:NodeShape;
+    sh:targetClass dbo:Place;
+    sh:property [
+        sh:path dbp:name;
+        sh:minCount 1;
+        sh:message "Place name is not set or undefined";
+    ];
+    sh:property [
+        sh:path dbp:location;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Place location is invalid";
+    ];
+    sh:property [
+        sh:path dbp:caption;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:message "Place caption is invalid";
+    ];
+    sh:property [
+        sh:path geo:lat;
+        sh:minCount 1;
+        sh:message "Place latitude not set";
+    ];
+    sh:property [
+        sh:path geo:lat;
+        sh:datatype xsd:float;
+        sh:minInclusive -90.000000;
+        sh:maxInclusive 90.000000;
+        sh:message "Place latitude not in standard range";
+    ];
+    sh:property [
+        sh:path geo:long;
+        sh:minCount 1;
+        sh:message "Place longitude not set";
+    ];
+    sh:property [
+        sh:path geo:long;
+        sh:datatype xsd:float;
+        sh:minInclusive -180.000000;
+        sh:maxInclusive 180.000000;
+        sh:message "Place longitude not in standard range";
+    ].
+#==============================================================================================
+
+#=========================================ORGANISATION=========================================
+:OrganisationShape a sh:NodeShape;
+    sh:targetClass dbo:Organisation;
+    sh:property [
+        sh:path dbp:keyPeople;
+        sh:minCount 1;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Organisation key people is invalid or undefined";
+    ];
+    sh:property [
+        sh:path dbp:homepage;
+        sh:minCount 0;
+        sh:maxCount 1;
+        sh:pattern "((?:http|https)://)?(?:www\\.)?[\\w\\d\\-_]+\\.\\w{2,3}(\\.\\w{2})?(/(?<=/)(?:[\\w\\d\\-./_]+)?)?";
+        sh:message "Organisation homepage URL is invalid";
+    ];
+    sh:property [
+        sh:path dbp:industry;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Organisation industry type is invalid";
+    ];
+    sh:property [
+        sh:path dbp:numEmployees;
+        sh:datatype xsd:integer;
+        sh:message "Organisation number of employees is invalid";
+    ].
+#==============================================================================================
+
+#==========================================RESTAURANT==========================================
+:RestaurantShape a sh:NodeShape;
+    sh:targetClass dbo:Restaurant;
+    sh:property [
+        sh:path dbp:city;
+        sh:minCount 1;
+        sh:nodeKind sh:IRI;
+        sh:message "Restaurant city is not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:country;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Restaurant country is invalid or not set";
+    ];
+    sh:property [
+        sh:path dbp:streetAddress;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:message "Restaurant street address is not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:postcode;
+        sh:maxCount 1;
+        sh:datatype xsd:integer;
+        sh:message "Restaurant postcode is invalid";
+    ];
+    sh:property [
+        sh:path dbp:foodType;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:maxCount 3;
+        sh:message "Restaurant food type is invalid or undefined";
+    ];
+    sh:property [
+        sh:path dbp:website;
+        sh:minCount 0;
+        sh:maxCount 1;
+        sh:pattern "((?:http|https)://)?(?:www\\.)?[\\w\\d\\-_]+\\.\\w{2,3}(\\.\\w{2})?(/(?<=/)(?:[\\w\\d\\-./_]+)?)?";
+        sh:message "Restaurant website URL is invalid";
+    ].
+#==============================================================================================
+
+#===========================================AIRPORT============================================
+:AirportShape a sh:NodeShape;
+    sh:targetClass dbo:Airport;
+    sh:property [
+        sh:path dbp:cityServed;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Airport city served is invalid";
+    ];
+    sh:property [
+        sh:path dbp:iata;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:minLength 3;
+        sh:maxLength 3;
+        sh:nodeKind sh:Literal;
+        sh:message "Airport IATA code is invalid or missing";
+    ];
+    sh:property [
+        sh:path dbp:icao;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:minLength 4;
+        sh:maxLength 4;
+        sh:nodeKind sh:Literal;
+        sh:message "Airport ICAO code is invalid or missing";
+    ];
+    sh:property [
+        sh:path dbp:operator;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Airport operator is invalid";
+    ];
+    sh:property [
+        sh:path dbp:startYear;
+        sh:datatype xsd:integer;
+        sh:message "Airport start year is invalid";
+    ];
+    sh:property [
+        sh:path dbp:website;
+        sh:minCount 0;
+        sh:maxCount 1;
+        sh:pattern "((?:http|https)://)?(?:www\\.)?[\\w\\d\\-_]+\\.\\w{2,3}(\\.\\w{2})?(/(?<=/)(?:[\\w\\d\\-./_]+)?)?";
+        sh:message "Airport website URL is invalid";
+    ];
+    sh:property [
+        sh:path dbp:hub;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Airport hub invalid";
+    ].
+#==============================================================================================
+
+#============================================WORK==============================================
+:WorkShape a sh:NodeShape;
+    sh:targetClass dbo:Work;
+    sh:property [
+        sh:path dbp:author;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Work author is invalid or not in the correct format";
+    ];
+    sh:property [
+        sh:path dbp:country;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Work origin country invalid";
+    ];
+    sh:property [
+        sh:path dbp:name;
+        sh:minCount 1;
+        sh:message "Work name is not set or invalid";
+    ].
+#==============================================================================================
+
+#===========================================ALBUM==============================================
+:AlbumShape a sh:NodeShape;
+    sh:targetClass dbo:Album;
+    sh:property [
+        sh:path dbp:artist;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Album artist is invalid";
+    ];
+    sh:property [
+        sh:path dbp:genre;
+        sh:minCount 1;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Album genre not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:label;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:minCount 1;
+        sh:message "Album label not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:length;
+        sh:nodeKind sh:Literal;
+        sh:pattern "([0-9]{2,3})[.](0)";
+        sh:message "Album tracks length invalid";
+    ];
+    sh:property [
+        sh:path dbp:producer;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:minCount 1;
+        sh:message "Album producer not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:recorded;
+        sh:or(
+            [
+                sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+                sh:datatype xsd:date;
+                sh:message "Album record date is invalid or undefined";
+            ]
+            [
+                sh:pattern "^\\d{4}";
+                sh:datatype xsd:integer;
+                sh:message "Album record year is invalid or undefined";
+            ]
+        );
+    ];
+    sh:property [
+        sh:path dbp:released;
+        sh:maxCount 1;
+        sh:or(
+            [
+                sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+                sh:datatype xsd:date;
+                sh:message "Album release date is invalid or undefined";
+            ]
+            [
+                sh:pattern "^\\d{4}";
+                sh:datatype xsd:integer;
+                sh:message "Album release year is invalid or undefined";
+            ]
+        );
+    ];
+    sh:property [
+        sh:path dbp:title;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Album tracks title invalid";
+    ].
+#==============================================================================================
+
+#===========================================SONG===============================================
+:SongShape a sh:NodeShape;
+    sh:targetClass dbo:Song;
+    sh:property [
+        sh:path dbp:album;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 1;
+        sh:message "Song album undefined or invalid";
+    ];
+    sh:property [
+        sh:path dbp:artist;
+        sh:minCount 1;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Song artist is invalid or not set";
+    ];
+    sh:property [
+        sh:path dbp:genre;
+        sh:minCount 1;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Song genre not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:label;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Song label is invalid";
+    ];
+    sh:property [
+        sh:path dbp:producer;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Song producer invalid";
+    ];
+    sh:property [
+        sh:path dbp:recorded;
+        sh:or(
+            [
+                sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+                sh:datatype xsd:date;
+                sh:message "Song record date is invalid or undefined";
+            ]
+            [
+                sh:pattern "^\\d{4}";
+                sh:datatype xsd:integer;
+                sh:message "Song record year is invalid or undefined";
+            ]
+        );
+    ];
+    sh:property [
+        sh:path dbp:released;
+        sh:maxCount 1;
+        sh:or(
+            [
+                sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+                sh:datatype xsd:date;
+                sh:message "Song release date is invalid or undefined";
+            ]
+            [
+                sh:pattern "^\\d{4}";
+                sh:datatype xsd:integer;
+                sh:message "Song release year is invalid or undefined";
+            ]
+        );
+    ];
+    sh:property [
+        sh:path dbp:title;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:nodeKind sh:Literal;
+        sh:message "Song title invalid or not set";
+    ];
+    sh:property [
+        sh:path dbp:writer;
+        sh:minCount 1;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Song writer not set or invalid";
+    ].
+#==============================================================================================
+
+#==========================================SPECIES=============================================
+:SpeciesShape a sh:NodeShape;
+    sh:targetClass dbo:Species;
+    sh:property [
+        sh:path dbp:classis; # CLASSE
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Species classis not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:familia; # FAMIGLIA
+        sh:nodeKind sh:IRI;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:message "Species familia not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:genus; # GENERE
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:message "Species genus not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:ordo; # ORDINE
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:nodeKind sh:IRI;
+        sh:message "Species ordo invalid or not set";
+    ];
+    sh:property [
+        sh:path dbp:regnum; # REGNO
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Species regnum not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:species; # SPECIE
+        sh:maxCount 1;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:message "Species species is invalid";
+    ];
+    # FOR ANIMALS - KINGDOM ANIMALIA
+    sh:property [
+        sh:path dbp:phylum; # TIPO 
+        sh:maxCount 1;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Species phylum not set or invalid";
+    ];
+    # FOR PLANTS - KINGDOM PLANTAE
+    sh:property [
+        sh:path dbp:divisio; # DIVISIONE
+        sh:maxCount 1;
+        sh:nodeKind sh:IRI;
+        sh:message "Species divisio is invalid";
+    ];
+    sh:property [
+        sh:path dbp:tribus; # TRIBU'
+        sh:maxCount 1;
+        sh:nodeKind sh:IRI;
+        sh:message "Species tribus is invalid";
+    ].
+#==============================================================================================
+
+#=====================================MILITARY CONFLICT========================================
+:MilitaryConflictShape a sh:NodeShape;
+    sh:targetClass dbo:MilitaryConflict;
+    sh:property [
+        sh:path dbp:caption;
+        sh:maxCount 1;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:message "Military conflict caption is invalid";
+    ];
+    sh:property [
+        sh:path dbp:casualties;
+        sh:minCount 1;
+        sh:nodeKind sh:Literal;
+        sh:or(
+            [
+                sh:languageIn ("en");
+            ]
+            [
+                sh:datatype xsd:integer;
+            ]   
+        );
+        sh:message "Military conflict casualties invalid or missing";
+    ];
+    sh:property [
+        sh:path dbp:combatant;
+        sh:minCount 2;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Military conflict combatant invalid or not set";
+    ];
+    sh:property [
+        sh:path dbp:commander;
+        sh:minCount 1;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Military conflict commander not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:conflict;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:message "Military conflict name is invalid";
+    ];
+    sh:property [
+        sh:path dbp:date;
+        sh:minCount 1;
+        sh:or(
+            [
+                sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+                sh:datatype xsd:date;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+                sh:minLength 1;
+            ]
+            [
+                sh:pattern "[0-9]{2,4}";
+                sh:datatype xsd:integer;
+            ]
+        );
+        sh:message "Military conflict date invalid format or undefined";
+    ];
+    sh:property [
+        sh:path dbp:partof;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:minLength 1;
+        sh:minCount 1;
+        sh:message "Military conflict part of is invalid or not set";
+    ];
+    sh:property [
+        sh:path dbp:place;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:minCount 1;
+        sh:message "Military conflict place not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:result;
+        sh:minCount 1;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:minLength 1;
+        sh:message "Military conflict result is invalid or not set";
+    ];
+    sh:property [
+        sh:path geo:lat;
+        sh:minCount 1;
+        sh:message "Military conflict latitude not set";
+    ];
+    sh:property [
+        sh:path geo:lat;
+        sh:datatype xsd:float;
+        sh:minInclusive -90.000000;
+        sh:maxInclusive 90.000000;
+        sh:message "Military conflict latitude not in standard range";
+    ];
+    sh:property [
+        sh:path geo:long;
+        sh:minCount 1;
+        sh:message "Military conflict longitude not set";
+    ];
+    sh:property [
+        sh:path geo:long;
+        sh:datatype xsd:float;
+        sh:minInclusive -180.000000;
+        sh:maxInclusive 180.000000;
+        sh:message "Military conflict longitude not in standard range";
+    ].
+#==============================================================================================
+
+#=========================================ELECTION=============================================
+:ElectionShape a sh:NodeShape;
+    sh:targetClass dbo:Election;
+    sh:property [
+        sh:path dbp:afterElection;
+        sh:minCount 1;
+        sh:nodeKind sh:IRI;
+        sh:message "Election after result winner is invalid or not set";
+    ];
+    sh:property [
+        sh:path dbp:beforeElection;
+        sh:minCount 1;
+        sh:nodeKind sh:IRI;
+        sh:message "Election before result is invalid or not set";
+    ];
+    sh:property [
+        sh:path dbp:candidate;
+        sh:minCount 1;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Election candidate list not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:country;
+        sh:minCount 1;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:message "Election country not set or invalid";
+    ];
+    sh:property [
+        sh:path dbp:electionDate;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+        sh:minCount 1;
+        sh:maxCount 2;
+        sh:datatype xsd:date;
+        sh:message "Election date is invalid or missing";
+    ];
+    sh:property [
+        sh:path dbp:nextElection;
+        sh:nodeKind sh:Literal;
+        sh:or(
+            [
+                sh:pattern "[0-9]{2,4}";
+                sh:datatype xsd:integer;
+            ]
+            [
+                sh:languageIn ("en");
+            ]
+        );
+        sh:message "Election next election is invalid";
+    ];
+    sh:property [
+        sh:path dbp:nextYear;
+        sh:maxCount 1;
+        sh:pattern "[0-9]{2,4}";
+        sh:datatype xsd:integer;
+        sh:message "Election next year invalid format";
+    ];
+    sh:property [
+        sh:path dbp:party;
+        sh:minCount 1;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Election party list is invalid or undefined";
+    ];
+    sh:property [
+        sh:path dbp:previousElection;
+        sh:nodeKind sh:Literal;
+        sh:or(
+            [
+                sh:pattern "[0-9]{2,4}";
+                sh:datatype xsd:integer;
+            ]
+            [
+                sh:languageIn ("en");
+            ]
+        );
+        sh:message "Election previous election is invalid";
+    ];
+    sh:property [
+        sh:path dbp:previousYear;
+        sh:maxCount 1;
+        sh:pattern "[0-9]{2,4}";
+        sh:datatype xsd:integer;
+        sh:message "Election previous year invalid format";
+    ];
+    sh:property [
+        sh:path dbp:title;
+        sh:maxCount 1;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Election title competition is invalid";
+    ];
+    sh:property [
+        sh:path dbp:type;
+        sh:maxCount 1;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:message "Election type is invalid";
+    ].
+#==============================================================================================
+
+#=======================================NATURAL EVENT==========================================
+:NaturalEventShape a sh:NodeShape;
+    sh:targetClass dbo:NaturalEvent;
+    sh:property [
+        sh:path dbp:casualties;
+        sh:nodeKind sh:Literal;
+        sh:or(
+            [
+                sh:pattern "[0-9]+";
+                sh:datatype xsd:integer;
+            ]
+            [
+                sh:languageIn ("en");
+            ]
+        );
+        sh:message "Natural event casualties is invalid";
+    ];
+    sh:property [
+        sh:path dbp:countriesAffected;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Natural event countries affecteted is invalid";
+    ];  
+    sh:property [
+        sh:path dbp:localDate;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+        sh:datatype xsd:date;
+        sh:message "Natural event local date not set or invalid";
+    ]; 
+    sh:property [
+        sh:path dbp:magnitude;
+        sh:or(
+            [
+                sh:pattern "([0-9]{1,3})[.]([0-9]{6})";
+                sh:datatype xsd:double;
+            ]
+            [
+                sh:pattern "[0-9]{1,3}";
+                sh:datatype xsd:integer;
+            ]   
+        );
+        sh:message "Natural event magnitude invalid format";
+    ];
+    sh:property [
+        sh:path dbp:tsunami;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:maxCount 1;
+        sh:message "Natural event tsunami is invalid";
+    ];
+    sh:property [
+        sh:path dbp:type;
+        sh:nodeKind sh:IRI;
+        sh:message "Natural event type is invalid";
+    ];
+    sh:property [
+        sh:path geo:lat;
+        sh:datatype xsd:float;
+        sh:minInclusive -90.000000;
+        sh:maxInclusive 90.000000;
+        sh:message "Natural event latitude not in standard range or invalid";
+    ];
+    sh:property [
+        sh:path geo:long;
+        sh:datatype xsd:float;
+        sh:minInclusive -180.000000;
+        sh:maxInclusive 180.000000;
+        sh:message "Natural event longitude not in standard range or invalid";
+    ].
+#==============================================================================================
+
+#=======================================SPORTS EVENT===========================================
+:SportsEventShape a sh:NodeShape;        
+    sh:targetClass dbo:SportsEvent;      
+    sh:property [
+        sh:path dbp:attendance;
+        sh:pattern "[0-9]+";
+        sh:datatype xsd:integer;
+        sh:maxCount 1;
+        sh:message "Sports event attendance is invalid";
+    ];
+    sh:property [
+        sh:path dbp:champions;
+        sh:nodeKind sh:IRIOrLiteral;
+        sh:message "Sports event champions is invalid";
+    ];
+    sh:property [
+        sh:path dbp:country;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:maxCount 1;
+        sh:minLength 1;
+        sh:message "Sports event country is invalid";
+    ];
+    sh:property [
+        sh:path dbp:course;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Sports event course is invalid";
+    ];
+    sh:property [
+        sh:path dbp:date;
+        sh:or(
+            [
+                sh:datatype xsd:date;
+                sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:minLength 1;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Sports event date is invalid or wrong format";
+    ];
+    sh:property [
+        sh:path dbp:dates;
+        sh:or(
+            [
+                sh:datatype xsd:date;
+                sh:pattern "^\\d{4}-\\d{2}-\\d{2}$";
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:minLength 1;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Sports event dates is invalid or wrong format";
+    ];
+    sh:property [
+        sh:path dbp:goals;
+        sh:or(
+            [
+                sh:pattern "[0-9]+";
+                sh:datatype xsd:integer;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:minLength 1;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Sports event goals is invalid or wrong format";
+    ];
+    sh:property [
+        sh:path dbp:matches;
+        sh:maxCount 1;
+        sh:datatype xsd:integer;
+        sh:pattern "[0-9]+";
+        sh:message "Sports event matches invalid";
+    ];
+    sh:property [
+        sh:path dbp:year;
+        sh:maxCount 1;
+        sh:datatype xsd:integer;
+        sh:pattern "[0-9]{1,4}";
+        sh:message "Sports event year is invalid";
+    ];
+    sh:property [
+        sh:path dbp:location;
+        sh:nodeKind sh:IRI;
+        sh:maxCount 3;
+        sh:message "Sports event location is invalid";
+    ];
+    sh:property [
+        sh:path dbp:grandPrix;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:maxCount 1;
+        sh:message "Sports event grand prix is invalid";
+    ];
+    sh:property [
+        sh:path dbp:type;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:maxCount 1;
+        sh:message "Sports event type is invalid";
+    ];
+    sh:property [
+        sh:path dbp:venue;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Sports event venue is invalid or wrong format";
+    ];
+    sh:property [
+        sh:path dbp:numTeams;
+        sh:maxCount 1;
+        sh:datatype xsd:integer;
+        sh:pattern "[0-9]{1,3}";
+        sh:message "Sports event number of teams is invalid";
+    ];
+    sh:property [
+        sh:path dbp:referee;
+        sh:maxCount 3;
+        sh:nodeKind sh:Literal;
+        sh:languageIn ("en");
+        sh:message "Sports event referee is invalid";
+    ];
+    sh:property [
+        sh:path dbp:stadium;
+        sh:or(
+            [
+                sh:nodeKind sh:IRI;
+            ]
+            [
+                sh:nodeKind sh:Literal;
+                sh:languageIn ("en");
+            ]   
+        );
+        sh:message "Sports event stadium is invalid";
+    ].
+#==============================================================================================

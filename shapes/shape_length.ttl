@@ -1,0 +1,29 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dbo: <http://dbpedia.org/ontology/> .
+@prefix dbp: <http://dbpedia.org/property/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix : <http://SEKM_EXAM.com/ns#> .
+
+:AirportLengthShape a sh:NodeShape;
+    sh:targetClass dbo:Airport;
+    sh:property [
+        sh:path dbp:iata;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:minLength 3;
+        sh:maxLength 3;
+        sh:nodeKind sh:Literal;
+        sh:message "Airport IATA code is invalid or missing";
+    ];
+    sh:property [
+        sh:path dbp:icao;
+        sh:minCount 1;
+        sh:maxCount 1;
+        sh:minLength 4;
+        sh:maxLength 4;
+        sh:nodeKind sh:Literal;
+        sh:message "Airport ICAO code is invalid or missing";
+    ].
